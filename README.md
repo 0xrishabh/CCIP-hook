@@ -7,3 +7,7 @@ This is for the project which wants to launch its tokens on the ETH mainnet for 
 
 1. Create a .env file with `ETHEREUM_SEPOLIA_RPC_URL` and `ARBITRUM_SEPOLIA_RPC_URL` RPC
 2. forge test --mc CCIP_SWAPTest -vv
+
+
+# Flow
+![image](https://github.com/user-attachments/assets/ae32a7fa-9e71-4a3e-882a-193b5141d3fd)
