@@ -73,7 +73,7 @@ contract CCIP_SWAP is BaseHook {
                 beforeDonate: false,
                 afterDonate: false,
                 beforeSwapReturnDelta: false,
-                afterSwapReturnDelta: false,
+                afterSwapReturnDelta: true,
                 afterAddLiquidityReturnDelta: false,
                 afterRemoveLiquidityReturnDelta: false
             });
