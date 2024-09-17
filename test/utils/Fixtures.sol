@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {Currency} from "v4-core/src/types/Currency.sol";
-import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
-import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
+import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
+import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
+import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {PositionManager} from "v4-periphery/src/PositionManager.sol";
 import {IPositionManager} from "v4-periphery/src/interfaces/IPositionManager.sol";
-import {Hooks} from "v4-core/src/libraries/Hooks.sol";
-import {PoolKey} from "v4-core/src/types/PoolKey.sol";
-import {Deployers} from "v4-core/test/utils/Deployers.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {Deployers} from "@uniswap/v4-core/test/utils/Deployers.sol";
 import {IERC20} from "forge-std/interfaces/IERC20.sol";
 import {IAllowanceTransfer} from "permit2/src/interfaces/IAllowanceTransfer.sol";
 import {DeployPermit2} from "permit2/test/utils/DeployPermit2.sol";
@@ -33,7 +33,9 @@ contract Fixtures is Deployers, DeployPermit2 {
     function deployPosm(IPoolManager poolManager) internal {
         // We use deployPermit2() to prevent having to use via-ir in this repository.
         permit2 = IAllowanceTransfer(deployPermit2());
-        posm = IPositionManager(new PositionManager(poolManager, permit2, 300_000));
+        posm = IPositionManager(
+            new PositionManager(poolManager, permit2, 300_000)
+        );
     }
 
     function seedBalance(address to) internal {
@@ -49,9 +51,17 @@ contract Fixtures is Deployers, DeployPermit2 {
     function approvePosmCurrency(Currency currency) internal {
         // Because POSM uses permit2, we must execute 2 permits/approvals.
         // 1. First, the caller must approve permit2 on the token.
-        IERC20(Currency.unwrap(currency)).approve(address(permit2), type(uint256).max);
+        IERC20(Currency.unwrap(currency)).approve(
+            address(permit2),
+            type(uint256).max
+        );
         // 2. Then, the caller must approve POSM as a spender of permit2. TODO: This could also be a signature.
-        permit2.approve(Currency.unwrap(currency), address(posm), type(uint160).max, type(uint48).max);
+        permit2.approve(
+            Currency.unwrap(currency),
+            address(posm),
+            type(uint160).max,
+            type(uint48).max
+        );
     }
 
     // Does the same approvals as approvePosm, but for a specific address.
@@ -61,26 +71,46 @@ contract Fixtures is Deployers, DeployPermit2 {
         vm.stopPrank();
     }
 
-    function permit(uint256 privateKey, uint256 tokenId, address operator, uint256 nonce) internal {
+    function permit(
+        uint256 privateKey,
+        uint256 tokenId,
+        address operator,
+        uint256 nonce
+    ) internal {
         bytes32 digest = getDigest(operator, tokenId, 1, block.timestamp + 1);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
         vm.prank(operator);
-        IERC721Permit_v4(address(posm)).permit(operator, tokenId, block.timestamp + 1, nonce, signature);
+        IERC721Permit_v4(address(posm)).permit(
+            operator,
+            tokenId,
+            block.timestamp + 1,
+            nonce,
+            signature
+        );
     }
 
-    function getDigest(address spender, uint256 tokenId, uint256 nonce, uint256 deadline)
-        internal
-        view
-        returns (bytes32 digest)
-    {
+    function getDigest(
+        address spender,
+        uint256 tokenId,
+        uint256 nonce,
+        uint256 deadline
+    ) internal view returns (bytes32 digest) {
         digest = keccak256(
             abi.encodePacked(
                 "\x19\x01",
                 IEIP712_v4(address(posm)).DOMAIN_SEPARATOR(),
-                keccak256(abi.encode(ERC721PermitHash.PERMIT_TYPEHASH, spender, tokenId, nonce, deadline))
+                keccak256(
+                    abi.encode(
+                        ERC721PermitHash.PERMIT_TYPEHASH,
+                        spender,
+                        tokenId,
+                        nonce,
+                        deadline
+                    )
+                )
             )
         );
     }

@@ -2,15 +2,15 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {Deployers} from "v4-core/test/utils/Deployers.sol";
-import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
-import {Hooks} from "v4-core/src/libraries/Hooks.sol";
-import {PoolSwapTest} from "v4-core/src/test/PoolSwapTest.sol";
-import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
-import {Currency} from "v4-core/src/types/Currency.sol";
-import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
-import {SafeCast} from "v4-core/src/libraries/SafeCast.sol";
-import {Constants} from "v4-core/test/utils/Constants.sol";
+import {Deployers} from "@uniswap/v4-core/test/utils/Deployers.sol";
+import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {PoolSwapTest} from "@uniswap/v4-core/src/test/PoolSwapTest.sol";
+import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
+import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
+import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
+import {SafeCast} from "@uniswap/v4-core/src/libraries/SafeCast.sol";
+import {Constants} from "@uniswap/v4-core/test/utils/Constants.sol";
 import {MockERC20} from "solmate/src/test/utils/mocks/MockERC20.sol";
 import {ExampleHook} from "./ExampleHook.sol";
 
@@ -76,10 +76,22 @@ contract ExampleHookTest is Test, Deployers {
 
         console2.log("--- STARTING BALANCES ---");
 
-        console2.log("User balance in currency0 before swapping: ", userBalanceBefore0);
-        console2.log("User balance in currency1 before swapping: ", userBalanceBefore1);
-        console2.log("Hook balance in currency0 before swapping: ", hookBalanceBefore0);
-        console2.log("Hook balance in currency1 before swapping: ", hookBalanceBefore1);
+        console2.log(
+            "User balance in currency0 before swapping: ",
+            userBalanceBefore0
+        );
+        console2.log(
+            "User balance in currency1 before swapping: ",
+            userBalanceBefore1
+        );
+        console2.log(
+            "Hook balance in currency0 before swapping: ",
+            hookBalanceBefore0
+        );
+        console2.log(
+            "Hook balance in currency1 before swapping: ",
+            hookBalanceBefore1
+        );
 
         vm.prank(user);
         swapRouter.swap(key, params, _defaultTestSettings(), ZERO_BYTES);
@@ -92,17 +104,45 @@ contract ExampleHookTest is Test, Deployers {
 
         console2.log("--- ENDING BALANCES ---");
 
-        console2.log("User balance in currency0 after swapping: ", userBalanceAfter0);
-        console2.log("User balance in currency1 after swapping: ", userBalanceAfter1);
-        console2.log("Hook balance in currency0 after swapping: ", hookBalanceAfter0);
-        console2.log("Hook balance in currency1 after swapping: ", hookBalanceAfter1);
+        console2.log(
+            "User balance in currency0 after swapping: ",
+            userBalanceAfter0
+        );
+        console2.log(
+            "User balance in currency1 after swapping: ",
+            userBalanceAfter1
+        );
+        console2.log(
+            "Hook balance in currency0 after swapping: ",
+            hookBalanceAfter0
+        );
+        console2.log(
+            "Hook balance in currency1 after swapping: ",
+            hookBalanceAfter1
+        );
 
         if (zeroForOne) {
-            assertEq(userBalanceAfter0, userBalanceBefore0 - amountToSwap, "amount 0");
-            assertEq(userBalanceAfter1, userBalanceBefore1 + amountToSwap, "amount 1");
+            assertEq(
+                userBalanceAfter0,
+                userBalanceBefore0 - amountToSwap,
+                "amount 0"
+            );
+            assertEq(
+                userBalanceAfter1,
+                userBalanceBefore1 + amountToSwap,
+                "amount 1"
+            );
         } else {
-            assertEq(userBalanceAfter0, userBalanceBefore0 + amountToSwap, "amount 0");
-            assertEq(userBalanceAfter1, userBalanceBefore1 - amountToSwap, "amount 1");
+            assertEq(
+                userBalanceAfter0,
+                userBalanceBefore0 + amountToSwap,
+                "amount 0"
+            );
+            assertEq(
+                userBalanceAfter1,
+                userBalanceBefore1 - amountToSwap,
+                "amount 1"
+            );
         }
     }
 
@@ -110,29 +150,58 @@ contract ExampleHookTest is Test, Deployers {
 
     function _printTestType(bool zeroForOne, int256 amountSpecified) internal {
         console2.log("--- TEST TYPE ---");
-        string memory zeroForOneString = zeroForOne ? "zeroForOne" : "oneForZero";
-        string memory swapType = amountSpecified < 0 ? "exactInput" : "exactOutput";
-        string memory currencyRequiredFromUser = zeroForOne ? "currency0" : "currency1";
-        string memory currencySpecified = zeroForOne == amountSpecified < 0 ? "currency0" : "currency1";
+        string memory zeroForOneString = zeroForOne
+            ? "zeroForOne"
+            : "oneForZero";
+        string memory swapType = amountSpecified < 0
+            ? "exactInput"
+            : "exactOutput";
+        string memory currencyRequiredFromUser = zeroForOne
+            ? "currency0"
+            : "currency1";
+        string memory currencySpecified = zeroForOne == amountSpecified < 0
+            ? "currency0"
+            : "currency1";
 
         console2.log("This is a", zeroForOneString, swapType, "swap");
-        console2.log("The user will owe an amount in", currencyRequiredFromUser);
+        console2.log(
+            "The user will owe an amount in",
+            currencyRequiredFromUser
+        );
         console2.log("The currency specified is", currencySpecified);
     }
 
     function _setUpBeforeSwapHook(address impl) internal {
-        address hookAddr = address(uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG));
+        address hookAddr = address(
+            uint160(
+                Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
+            )
+        );
         _etchHookAndInitPool(hookAddr, impl);
     }
 
     function _etchHookAndInitPool(address hookAddr, address implAddr) internal {
         vm.etch(hookAddr, implAddr.code);
         hook = hookAddr;
-        (key,) = initPoolAndAddLiquidity(currency0, currency1, IHooks(hook), 100, SQRT_PRICE_1_1, ZERO_BYTES);
+        (key, ) = initPoolAndAddLiquidity(
+            currency0,
+            currency1,
+            IHooks(hook),
+            100,
+            SQRT_PRICE_1_1,
+            ZERO_BYTES
+        );
     }
 
-    function _defaultTestSettings() internal returns (PoolSwapTest.TestSettings memory testSetting) {
-        return PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false});
+    function _defaultTestSettings()
+        internal
+        returns (PoolSwapTest.TestSettings memory testSetting)
+    {
+        return
+            PoolSwapTest.TestSettings({
+                takeClaims: false,
+                settleUsingBurn: false
+            });
     }
 
     function _setApprovalsFor(address _user, address token) internal {
